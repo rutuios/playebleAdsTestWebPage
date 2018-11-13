@@ -35,14 +35,21 @@
 
         function onReadyCallback()
         {
-            console.log();
-            //No need to listen to this event anymore
             dapi.removeEventListener("ready", onReadyCallback);
-            //If the ad is visible start the game
+            
             dapi.isViewable() ? startMainGame() : false;
-            //Use dapi functions
-            dapi.addEventListener("viewableChange", viewableChangeCallback);
-            dapi.addEventListener("adResized", orientationCallback);            
+
+            dapi.addEventListener("audioVolumeChange", audioVolumeChangeCallback);         
+        }
+
+        function viewableChangeCallback(e)
+        {
+            e.isViewable ? startMainGame() : pause(); //start the game or resume
+        }
+
+        function audioVolumeChangeCallback(volume){
+            var vol = dapi.getAudioVolume();
+            console.log("volume : "+vol);
         }
 
         var startMainGame=function()
@@ -3190,11 +3197,6 @@
             };
             cc.game.run("gameCanvas");
         };
-
-        function viewableChangeCallback(e)
-        {
-            e.isViewable ? startMainGame() : pause(); //start the game or resume
-        }
 
     </script>
     <script type="text/javascript">
