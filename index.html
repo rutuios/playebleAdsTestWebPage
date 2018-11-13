@@ -36,10 +36,13 @@
         function onReadyCallback()
         {
             dapi.removeEventListener("ready", onReadyCallback);
-            
+
             dapi.isViewable() ? startMainGame() : false;
 
-            dapi.addEventListener("audioVolumeChange", audioVolumeChangeCallback);         
+            dapi.addEventListener("audioVolumeChange", audioVolumeChangeCallback);  
+
+            var vol = dapi.getAudioVolume();
+            console.log("volume : "+vol);       
         }
 
         function viewableChangeCallback(e)
@@ -49,7 +52,7 @@
 
         function audioVolumeChangeCallback(volume){
             var vol = dapi.getAudioVolume();
-            console.log("volume : "+vol);
+            console.log("volume change: "+vol);
         }
 
         var startMainGame=function()
