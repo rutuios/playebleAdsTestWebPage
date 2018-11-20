@@ -15,6 +15,7 @@
 
     <script type="text/javascript">
         
+        var screenSizeDapi = null;
         var Openlink=function()
         {
             dapi.openStoreUrl();
@@ -22,11 +23,11 @@
 
         window.onload = function()
         {
-            if(!dapi || dapi.isDemoDapi)
-            {
-                startMainGame(false);
-                return;
-            }
+            // if(!dapi || dapi.isDemoDapi)
+            // {
+            //     startMainGame(false);
+            //     return;
+            // }
             if(dapi.isReady())
             {
                 onReadyCallback();
@@ -40,28 +41,39 @@
         function onReadyCallback()
         {
             dapi.removeEventListener("ready", onReadyCallback);
-
-            dapi.isViewable() ? startMainGame(true) : null 
-
+            if(dapi.isViewable())
+            {
+                adVisibleCallback({isViewable: true});
+            }
+            dapi.addEventListener("viewableChange", adVisibleCallback);
+            dapi.addEventListener("adResized", adResizeCallback);
             dapi.addEventListener("audioVolumeChange", audioVolumeChangeCallback);  
-
             var vol = dapi.getAudioVolume();
-            console.log("volume : "+vol);       
+        }
+        function adVisibleCallback(event){
+            console.log("isViewable " + event.isViewable);
+            if (event.isViewable)
+            {
+                screenSizeDapi = dapi.getScreenSize();
+                startMainGame(true);
+                //START or RESUME the ad
+            } else {
+                //PAUSE the ad and MUTE sounds
+            }
         }
 
-        function viewableChangeCallback(e)
+        function adResizeCallback(event)
         {
-            e.isViewable ? startMainGame(true) : null //start the game or resume
+            screenSizeDapi = event;
+            console.log("ad was resized width " + event.width + " height " + event.height);
         }
 
         function audioVolumeChangeCallback(volume){
             var vol = dapi.getAudioVolume();
-            console.log("volume change: "+vol);
         }
 
         var startMainGame=function(isDapi)
         {
-            var screenSizeDapi = isDapi?dapi.getScreenSize():null;
             cc.game.onStart = function()
             {
                 cc.director.setDisplayStats(false);
@@ -282,27 +294,28 @@
                     {
                         this.size = cc.director.getWinSize();
 
-                        var vsize = cc.director.getVisibleSize();
+                        var vsize = cc.view.getFrameSize();
 
-                        var canvas = document.getElementById('gameCanvas');
+                        //var canvas = document.getElementById('gameCanvas');
                         
                         var inticial_Scale=720/960;
 
                         var screenSize;
-                        // var Current_Scale=canvas.width/canvas.height;
+
                         if(screenSizeDapi)
                         {
                             screenSize=screenSizeDapi
                         }
                         else
                         {
-                            screenSize = cc.size(canvas.width,canvas.height);
+                            screenSize = cc.size(vsize.width,vsize.height);
+                        }
+                        if(!screenSize)
+                        {
+                            screenSize = cc.size(0,0);
                         }
 
                         var Current_Scale=screenSize.width/screenSize.height;
-                        
-
-
 
                         this.Check_IX=0.0;
 
@@ -348,7 +361,6 @@
                         this.LOGLBL.setColor(cc.color.BLACK);
                         this.LOGLBL.setAnchorPoint(cc.p(0,0))
                         this.addChild(this.LOGLBL,50);
-
 
                         this.setAnchorPoint(cc.p(0.5, 0.0));
                         this.setScaleX(this.Final_ScaleX);
@@ -402,15 +414,13 @@
                         this.points=[];
                         this.points_dummy=[];
 
-                       
-
                         //image_Play_Area_Dot_images
 
                         this.create_Play_Area();
                         this.create_Top_Panel();
                         this.create_Bottom_Panel();
 
-                         for(var i=1;i<=32;i++)
+                        for(var i=1;i<=32;i++)
                         {
                             this.points[i]=new cc.Sprite(this.texturesArray.image_Play_Area_Dot_images);
                             this.points[i].setPosition(cc.p(1000,1000));
@@ -3209,7 +3219,10 @@
             };
             cc.game.run("gameCanvas");
         };
+        var pause=function()
+        {
 
+        };
     </script>
     <script type="text/javascript">
 
